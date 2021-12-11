@@ -86,10 +86,9 @@
            move 1 to a-pointer
            unstring numbers-drawn(a-pointer:) delimited by all ','
                into a-number-drawn count in a-count
-           pointer a-pointer
            end-unstring
-           if numbers-drawn(a-pointer:1) = ',' add 1 to a-pointer end-if
-           perform until a-count = 0
+           add a-count 1 to a-pointer
+           perform until a-pointer > length of numbers-drawn
               perform varying bbx from 1 by 1
                 until bbx > a-rem-roof
                  perform varying rwx from 1 by 1 until rwx > 5
@@ -107,11 +106,8 @@
               unstring numbers-drawn(a-pointer:)
                 delimited by all ','
                   into a-number-drawn count in a-count
-              pointer a-pointer
               end-unstring
-              if numbers-drawn(a-pointer:1) = ','
-                 add 1 to a-pointer
-              end-if
+              add a-count 1 to a-pointer
            end-perform
 
            accept a-dummy *> To keep the console open
