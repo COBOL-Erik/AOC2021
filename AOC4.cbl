@@ -36,6 +36,7 @@
        77 a-pointer  pic S9(4) comp-4 value zero.
        77 a-rem-roof pic S9(4) comp-4 value zero.
        77 a-unmarked-sum pic S9(8) comp-4 value zero.
+       77 a-ans      pic S9(8) comp-4 value zero.
        01 filler     pic X value space.
           88 is-bingo value 'B'.
 
@@ -124,11 +125,22 @@
            accept a-dummy *> To keep the console open
            goback
            .
+
+      * Go thru the whole board, add numbers not marked
        get-ans section.
+           perform varying cwx from 1 by 1 until cwx > 5
+              perform varying clx from 1 by 1 until clx > 5
+                 if not marked(clx,cwx,bbx)
+                    add cur-num(clx,cwx,bbx) to a-unmarked-sum
+                 end-if
+              end-perform
+           end-perform
+           display a-unmarked-sum
+           compute a-ans = a-unmarked-sum * cur-num(klx,rwx,bbx)
+           display a-ans
            .
 
        check-bingo section.
-           move zero to a-unmarked-sum
       * Check if all marked on row:
            perform varying clx from 1 by 1 until clx > 5
               if not marked(clx,rwx,bbx)
