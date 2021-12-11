@@ -34,13 +34,15 @@
        77 a-number-drawn pic XX.
        77 a-count    pic S9(4) comp-4 value zero.
        77 a-pointer  pic S9(4) comp-4 value zero.
-       77 a-inc      pic S9(4) comp-4 value zero.
+       77 a-pointer1 pic S9(4) comp-4 value zero.
+       77 a-rem-roof pic S9(4) comp-4 value zero.
 
        01 bingo-boards.
           05 bingo-board occurs 200 times.
              10 row occurs 5 times.
                 15 kol occurs 5 times.
-                   20 cur-num pic 99.
+                   20 cur-num-x.
+                      21 cur-num pic 99.
                    20 marker  pic X value space.
                       88 marked value 'X'.
 
@@ -71,6 +73,7 @@
               add 1 to rwx
               read bingo-file at end set eof-in to true end-read
            end-perform
+           move bbx to a-rem-roof
            close bingo-file
 
       * Read in numbers drawn:
@@ -79,37 +82,37 @@
            close input-file
 
       * Mark them:
-           move 1 to a-pointer
-           display numbers-drawn(a-pointer:)
-           unstring numbers-drawn(a-pointer:) delimited by all ','
-               into a-number-drawn count in a-count
-           pointer a-pointer
-           end-unstring
-           display a-count
-           display a-pointer
-           display a-dummy
-           display numbers-drawn(a-pointer:)
-
            move zero to a-count
+           move 1 to a-pointer
            unstring numbers-drawn(a-pointer:) delimited by all ','
                into a-number-drawn count in a-count
            pointer a-pointer
            end-unstring
-           display a-count
-           display a-pointer
-           display a-dummy
-           display numbers-drawn(a-pointer:)
-
-      *    perform varying bbx from 1 by 1 until bingo-board(bbx) = ' '
-      *
-      *       perform varying rwx from 1 by 1 until rwx > 5
-      *          move zero to a-inc
-      *          inspect numbers-drawn tallying a-inc for all
-      *             function trim(bingo-number-x(inx))
-      *          if a-inc > 0
-      *             set marked(inx,rwx,bbx) to true
-      *          end-if
-      *          display cur-num(inx,rwx,bbx) ' ' marker(inx,rwx,bbx)
+           if numbers-drawn(a-pointer:1) = ',' add 1 to a-pointer end-if
+           perform until a-count = 0
+              perform varying bbx from 1 by 1
+                until bbx > a-rem-roof
+                 perform varying rwx from 1 by 1 until rwx > 5
+                    perform varying klx from 1 by 1 until klx > 5
+                       if function trim(cur-num-x(klx,rwx,bbx)) =
+                          a-number-drawn
+                          set marked(klx,rwx,bbx) to true
+                       end-if
+                       display cur-num(klx,rwx,bbx) 
+      -                        ' ' marker(klx,rwx,bbx)
+                    end-perform
+                 end-perform
+              end-perform
+              move zero to a-count
+              unstring numbers-drawn(a-pointer:)
+                delimited by all ','
+                  into a-number-drawn count in a-count
+              pointer a-pointer
+              end-unstring
+              if numbers-drawn(a-pointer:1) = ','
+                 add 1 to a-pointer
+              end-if
+           end-perform
 
            accept a-dummy *> To keep the console open
            goback.
