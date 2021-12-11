@@ -31,8 +31,9 @@
 
        working-storage section.
        77 a-dummy    pic X.
-       77 a-work-num pic S9(4) comp-4.
-       77 a-prev-num pic S9(4) comp-4 value zero.
+       77 a-number-drawn pic XX.
+       77 a-count    pic S9(4) comp-4 value zero.
+       77 a-pointer  pic S9(4) comp-4 value zero.
        77 a-inc      pic S9(4) comp-4 value zero.
 
        01 bingo-boards.
@@ -40,7 +41,7 @@
              10 row occurs 5 times.
                 15 kol occurs 5 times.
                    20 cur-num pic 99.
-                   20 filler  pic X value space.
+                   20 marker  pic X value space.
                       88 marked value 'X'.
 
        01 indices.
@@ -53,11 +54,6 @@
           88 eof-in value 'EOFi'.
 
        procedure division.
-      * Read in numbers drawn:
-           open input input-file
-           read input-file
-           close input-file
-
       * Read in bingo boards:
            move 1 to bbx rwx klx
            open input bingo-file
@@ -71,15 +67,49 @@
               end-if
               perform varying inx from 1 by 1 until inx > 5
                  move bingo-number(inx) to cur-num(inx,rwx,bbx)
-                 display function trim(bingo-number-x(inx))
               end-perform
               add 1 to rwx
               read bingo-file at end set eof-in to true end-read
            end-perform
-           display bbx
-           display rwx
-           display cur-num(5,3,2)
            close bingo-file
+
+      * Read in numbers drawn:
+           open input input-file
+           read input-file
+           close input-file
+
+      * Mark them:
+           move 1 to a-pointer
+           display numbers-drawn(a-pointer:)
+           unstring numbers-drawn(a-pointer:) delimited by all ','
+               into a-number-drawn count in a-count
+           pointer a-pointer
+           end-unstring
+           display a-count
+           display a-pointer
+           display a-dummy
+           display numbers-drawn(a-pointer:)
+
+           move zero to a-count
+           unstring numbers-drawn(a-pointer:) delimited by all ','
+               into a-number-drawn count in a-count
+           pointer a-pointer
+           end-unstring
+           display a-count
+           display a-pointer
+           display a-dummy
+           display numbers-drawn(a-pointer:)
+
+      *    perform varying bbx from 1 by 1 until bingo-board(bbx) = ' '
+      *
+      *       perform varying rwx from 1 by 1 until rwx > 5
+      *          move zero to a-inc
+      *          inspect numbers-drawn tallying a-inc for all
+      *             function trim(bingo-number-x(inx))
+      *          if a-inc > 0
+      *             set marked(inx,rwx,bbx) to true
+      *          end-if
+      *          display cur-num(inx,rwx,bbx) ' ' marker(inx,rwx,bbx)
 
            accept a-dummy *> To keep the console open
            goback.
