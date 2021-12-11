@@ -34,8 +34,10 @@
        77 a-number-drawn pic XX.
        77 a-count    pic S9(4) comp-4 value zero.
        77 a-pointer  pic S9(4) comp-4 value zero.
-       77 a-pointer1 pic S9(4) comp-4 value zero.
        77 a-rem-roof pic S9(4) comp-4 value zero.
+       77 a-unmarked-sum pic S9(8) comp-4 value zero.
+       01 filler     pic X value space.
+          88 is-bingo value 'B'.
 
        01 bingo-boards.
           05 bingo-board occurs 200 times.
@@ -51,11 +53,14 @@
           05 bbx pic S9(4) comp-4.
           05 rwx pic S9(4) comp-4.
           05 klx pic S9(4) comp-4.
+          05 clx pic S9(4) comp-4.
+          05 cwx pic S9(4) comp-4.
 
        01 file-eof   pic X(4)         value 'on'.
           88 eof-in value 'EOFi'.
 
        procedure division.
+       a-main.
       * Read in bingo boards:
            move 1 to bbx rwx klx
            open input bingo-file
@@ -96,9 +101,9 @@
                        if function trim(cur-num-x(klx,rwx,bbx)) =
                           a-number-drawn
                           set marked(klx,rwx,bbx) to true
+                          perform check-bingo
+                          if is-bingo go to section-end end-if
                        end-if
-                       display cur-num(klx,rwx,bbx) 
-      -                        ' ' marker(klx,rwx,bbx)
                     end-perform
                  end-perform
               end-perform
@@ -109,6 +114,42 @@
               end-unstring
               add a-count 1 to a-pointer
            end-perform
+           .
 
+       section-end.
+           if not is-bingo
+              display 'Got to the end, but no bingo. Bummer!'
+           end-if
+           perform get-ans
            accept a-dummy *> To keep the console open
-           goback.
+           goback
+           .
+       get-ans section.
+           .
+
+       check-bingo section.
+           move zero to a-unmarked-sum
+      * Check if all marked on row:
+           perform varying clx from 1 by 1 until clx > 5
+              if not marked(clx,rwx,bbx)
+                 exit perform
+              end-if
+           end-perform
+           if clx > 5
+              display 'Found bingo board (row)!: ' bbx 
+              set is-bingo to true
+              exit section
+           end-if
+
+      * Check if all marked on column:
+           perform varying cwx from 1 by 1 until cwx > 5
+              if not marked(klx,cwx,bbx)
+                 exit perform
+              end-if
+           end-perform
+           if cwx > 5
+              display 'Found bingo board (column)!: ' bbx 
+              set is-bingo to true
+              exit section
+           end-if
+           .
